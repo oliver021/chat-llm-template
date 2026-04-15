@@ -11,7 +11,7 @@ Every AI product eventually needs a chat interface. Most teams build the same th
 
 **Aura is the starting point you wish you had.**
 
-It's a fully-featured, visually polished chat UI built with the modern React stack. It handles the interface layer completely. You wire up your API, and you're live.
+It's a fully-featured (pretends), visually polished chat UI built with the modern React stack. It handles the interface layer completely. You wire up your API, and you're live.
 
 ![Chat Preview](screenshots/new_chat.png)
 ---
@@ -25,6 +25,12 @@ It's a fully-featured, visually polished chat UI built with the modern React sta
 - Resizable, auto-expanding text input
 - Settings modal with Account, Appearance, and Privacy tabs
 
+### Agnostic Backend
+Basically we have everything without wiring with actual backend, most ui components
+that I found are opinated or fully broated, through this template
+is possible design or integrate with pre-existing backend.
+
+
 ### Experience
 ![Chat Preview](screenshots/chat.png)
 - Keyboard shortcuts (Cmd+K for search, Cmd+/ for help)
@@ -36,6 +42,12 @@ It's a fully-featured, visually polished chat UI built with the modern React sta
 - Inter font, gradient accents, glassmorphism sidebar
 
 ### Pre-built Setting
+- Settings modal with Account, Appearance, and Privacy tabs
+- Theme persistence and quick-access controls
+- User preferences baked in — no need to build settings from scratch
+- Extensible structure for custom account and privacy options
+- Elements can be changes base on your needs
+
 ![Chat Preview](screenshots/settings.png)
 
 ### Engineering
