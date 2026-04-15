@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+/* Dark mode via .dark class on <html> */
+@variant dark (&:where(.dark, .dark *));
+
+/* Custom theme tokens (replaces tailwind.config.js in v4) */
+@theme {
+  --font-family-sans: 'Inter', sans-serif;
+
+  --color-gray-850: #1f2937;
+  --color-gray-900: #111827;
+  --color-gray-950: #030712;
+
+  --animate-fade-in-up: fadeInUp 0.5s ease-out;
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  --keyframes-fadeInUp-0: { opacity: 0; transform: translateY(10px); };
+  --keyframes-fadeInUp-100: { opacity: 1; transform: translateY(0); };
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.4);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.6);
+}
+
+/* Hide scrollbar for clean sidebar but allow scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
