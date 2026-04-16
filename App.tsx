@@ -60,13 +60,18 @@ const App: React.FC = () => {
           isOpen={sidebarOpen}
         />
 
-        <main className="flex-1 flex flex-col min-w-0 h-full relative">
+        {/* MAIN LAYOUT: Flex column with fixed header + scrollable chat area */}
+        {/* flex-1: Main expands to fill remaining space (after sidebar on md:)*/}
+        {/* h-full: NOT NEEDED - flex-1 in flex container is sufficient */}
+        {/* min-w-0: Prevents overflow of flex children on narrow screens */}
+        <main className="flex-1 flex flex-col min-w-0 relative">
           <TopNav
             theme={theme}
             toggleTheme={toggleTheme}
             toggleSidebar={openSidebar}
             currentChatTitle={activeChat?.title !== 'New Chat' ? activeChat?.title : undefined}
           />
+          {/* ChatArea: flex-1 takes remaining space after header (which is flex-shrink-0) */}
           <ChatArea chat={activeChat} isTyping={isTyping} />
         </main>
 

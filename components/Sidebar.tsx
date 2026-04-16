@@ -25,6 +25,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const pinnedChats = chats.filter((c) => c.isPinned).sort((a, b) => b.updatedAt - a.updatedAt);
   const recentChats = chats.filter((c) => !c.isPinned).sort((a, b) => b.updatedAt - a.updatedAt);
 
+  // SCROLLBAR WIDTH COMPENSATION (see index.html scrollbar-gutter: stable):
+  // On desktop (md:), when ChatArea scrolls, its scrollbar (~17px) appears.
+  // Without compensation, sidebar visually "expands" making a gap between sidebar border and scrollbar.
+  // Solution: CSS scrollbar-gutter: stable reserves scrollbar space to prevent layout shift.
+
   return (
     <aside
       className={`

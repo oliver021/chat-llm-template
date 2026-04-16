@@ -11,7 +11,10 @@ interface TopNavProps {
 
 export const TopNav: React.FC<TopNavProps> = ({ theme, toggleTheme, toggleSidebar, currentChatTitle }) => {
   return (
-    <header className="h-16 flex items-center justify-between px-4 md:px-6 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800/50 sticky top-0 z-10">
+    // FIXED HEIGHT HEADER: Explicitly set h-16 (64px) to prevent compression
+    // position: sticky top-0 keeps header visible when ChatArea scrolls
+    // flex-shrink-0 prevents Tailwind flex from shrinking this element
+    <header className="h-16 flex-shrink-0 flex items-center justify-between px-4 md:px-6 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800/50 sticky top-0 z-10">
       <div className="flex items-center gap-3">
         <button 
           onClick={toggleSidebar}

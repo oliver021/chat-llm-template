@@ -32,10 +32,13 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping }) => {
   }, [chat?.messages]);
 
   return (
-    <div className="flex-1 flex flex-col h-full relative bg-white dark:bg-gray-950">
+    // ChatArea Container: flex-1 fills remaining space after header
+    // h-full NOT NEEDED: Parent (main) has fixed header (h-16), so ChatArea takes remaining space via flex-1
+    // overflow-hidden: Prevents double scrollbars; internal divs handle scrolling
+    <div className="flex-1 flex flex-col relative bg-white dark:bg-gray-950 overflow-hidden">
       {isNewChat ? (
         // New Chat View - Centered
-        <div className="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in-up">
+        <div className="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in-up overflow-y-auto">
           <div className="w-20 h-20 mb-8 rounded-3xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center shadow-inner">
             <ColorfulIcon icon={Sparkles} colorClass="text-blue-500 dark:text-blue-400" size={40} />
           </div>
