@@ -16,7 +16,11 @@ import {
   X,
   User,
   Palette,
-  Shield
+  Shield,
+  Copy,
+  Pencil,
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 
 interface ColorfulIconProps {
@@ -48,5 +52,9 @@ export {
   X,
   User,
   Palette,
-  Shield
+  Shield,
+  Copy,
+  Pencil,
+  Trash2,
+  RefreshCw
 };

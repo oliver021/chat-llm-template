@@ -1,19 +1,27 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { ChatSession } from '../types';
 import { SUGGESTED_PROMPTS } from '../constants';
+import { groupMessagesByDate } from '../utils/timeUtils';
 import { useChatActions } from '../context/ChatContext';
 import { ChatInput } from './ChatInput';
 import { MessageBubble } from './MessageBubble';
+import { TypingIndicator } from './TypingIndicator';
 import { Sparkles, ColorfulIcon } from './Icons';
 
 interface ChatAreaProps {
   chat: ChatSession | null;
+  isTyping?: boolean;
 }
 
-export const ChatArea: React.FC<ChatAreaProps> = ({ chat }) => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping }) => {
   const { handleSendMessage } = useChatActions();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isNewChat = !chat || chat.messages.length === 0;
+
+  const messageGroups = useMemo(() => {
+    if (!chat || chat.messages.length === 0) return [];
+    return groupMessagesByDate(chat.messages);
+  }, [chat?.messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -60,9 +68,23 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat }) => {
         <>
           <div className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth">
             <div className="max-w-4xl mx-auto flex flex-col gap-2 pb-4">
-              {chat.messages.map((msg) => (
-                <MessageBubble key={msg.id} message={msg} />
+              {messageGroups.map((group) => (
+                <div key={group.date}>
+                  <div className="flex items-center gap-3 my-4 sticky top-0 bg-white dark:bg-gray-950 py-2 z-10">
+                    <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2">
+                      {group.date}
+                    </span>
+                    <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+                  </div>
+                  <div className="space-y-2">
+                    {group.messages.map((msg) => (
+                      <MessageBubble key={msg.id} message={msg} chatId={chat!.id} />
+                    ))}
+                  </div>
+                </div>
               ))}
+              {isTyping && <TypingIndicator />}
               <div ref={messagesEndRef} />
             </div>
           </div>

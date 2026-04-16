@@ -12,12 +12,34 @@ const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { sidebarOpen, settingsOpen, openSidebar, closeSidebar, openSettings, closeSettings } =
     useUIState();
-  const { chats, activeChatId, activeChat, handleNewChat, handleSelectChat, handleTogglePin, handleSendMessage } =
-    useChats(closeSidebar);
+  const {
+    chats,
+    activeChatId,
+    activeChat,
+    isTyping,
+    handleNewChat,
+    handleSelectChat,
+    handleTogglePin,
+    handleSendMessage,
+    handleCopyMessage,
+    handleDeleteMessage,
+    handleEditMessage,
+    handleRegenerateMessage,
+  } = useChats(closeSidebar);
 
   return (
     <ChatActionsProvider
-      value={{ handleSendMessage, handleNewChat, handleSelectChat, handleTogglePin, openSettings }}
+      value={{
+        handleSendMessage,
+        handleNewChat,
+        handleSelectChat,
+        handleTogglePin,
+        openSettings,
+        handleCopyMessage,
+        handleDeleteMessage,
+        handleEditMessage,
+        handleRegenerateMessage,
+      }}
     >
       <div className="flex h-full w-full overflow-hidden bg-white dark:bg-gray-950">
         {/* Mobile Sidebar Overlay */}
@@ -45,7 +67,7 @@ const App: React.FC = () => {
             toggleSidebar={openSidebar}
             currentChatTitle={activeChat?.title !== 'New Chat' ? activeChat?.title : undefined}
           />
-          <ChatArea chat={activeChat} />
+          <ChatArea chat={activeChat} isTyping={isTyping} />
         </main>
 
         <SettingsModal isOpen={settingsOpen} onClose={closeSettings} />

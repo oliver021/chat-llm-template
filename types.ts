@@ -3,6 +3,8 @@ export interface Message {
   role: 'user' | 'ai';
   content: string;
   timestamp: number;
+  isEdited?: boolean;
+  editedAt?: number;
 }
 
 export interface ChatSession {

@@ -6,6 +6,10 @@ interface ChatActionsContextValue {
   handleSelectChat: (id: string) => void;
   handleTogglePin: (id: string) => void;
   openSettings: () => void;
+  handleCopyMessage: (messageId: string) => void;
+  handleDeleteMessage: (chatId: string, messageId: string) => void;
+  handleEditMessage: (chatId: string, messageId: string, newContent: string) => void;
+  handleRegenerateMessage: (chatId: string, messageId: string) => void;
 }
 
 const ChatActionsContext = createContext<ChatActionsContextValue | null>(null);
