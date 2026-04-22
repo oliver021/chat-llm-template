@@ -5,6 +5,9 @@ export interface Message {
   timestamp: number;
   isEdited?: boolean;
   editedAt?: number;
+  // Streaming: true while the AI response is being written token by token.
+  // The bubble renders partial content live; the cursor animates until false.
+  isStreaming?: boolean;
 }
 
 export interface ChatSession {

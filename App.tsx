@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
+import { Toaster } from 'sonner';
 import { Sidebar } from './components/Sidebar';
 import { TopNav } from './components/TopNav';
 import { ChatArea } from './components/ChatArea';
@@ -7,6 +8,7 @@ import { ChatActionsProvider } from './context/ChatContext';
 import { useTheme } from './hooks/useTheme';
 import { useUIState } from './hooks/useUIState';
 import { useChats } from './hooks/useChats';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -26,6 +28,24 @@ const App: React.FC = () => {
     handleEditMessage,
     handleRegenerateMessage,
   } = useChats(closeSidebar);
+
+  // Ref forwarded to ChatInput so the keyboard shortcut can focus it
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleFocusInput = useCallback(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleToggleSidebar = useCallback(() => {
+    sidebarOpen ? closeSidebar() : openSidebar();
+  }, [sidebarOpen, closeSidebar, openSidebar]);
+
+  // Global keyboard shortcuts: Cmd+K (new chat), Cmd+Shift+S (sidebar), / (focus input)
+  useKeyboardShortcuts({
+    onNewChat: handleNewChat,
+    onToggleSidebar: handleToggleSidebar,
+    onFocusInput: handleFocusInput,
+  });
 
   return (
     <ChatActionsProvider
@@ -61,8 +81,7 @@ const App: React.FC = () => {
         />
 
         {/* MAIN LAYOUT: Flex column with fixed header + scrollable chat area */}
-        {/* flex-1: Main expands to fill remaining space (after sidebar on md:)*/}
-        {/* h-full: NOT NEEDED - flex-1 in flex container is sufficient */}
+        {/* flex-1: Main expands to fill remaining space (after sidebar on md:) */}
         {/* min-w-0: Prevents overflow of flex children on narrow screens */}
         <main className="flex-1 flex flex-col min-w-0 relative">
           <TopNav
@@ -71,12 +90,27 @@ const App: React.FC = () => {
             toggleSidebar={openSidebar}
             currentChatTitle={activeChat?.title !== 'New Chat' ? activeChat?.title : undefined}
           />
-          {/* ChatArea: flex-1 takes remaining space after header (which is flex-shrink-0) */}
-          <ChatArea chat={activeChat} isTyping={isTyping} />
+          {/* ChatArea: flex-1 takes remaining space after header (flex-shrink-0) */}
+          <ChatArea chat={activeChat} isTyping={isTyping} inputRef={inputRef} />
         </main>
 
         <SettingsModal isOpen={settingsOpen} onClose={closeSettings} />
       </div>
+
+      {/*
+        Toaster: positioned top-right, respects dark/light mode automatically.
+        richColors enables semantic green/red/yellow styling for success/error/warning.
+      */}
+      <Toaster
+        position="top-right"
+        richColors
+        closeButton
+        theme={theme}
+        toastOptions={{
+          duration: 3000,
+          style: { fontFamily: 'Inter, sans-serif' },
+        }}
+      />
     </ChatActionsProvider>
   );
 };

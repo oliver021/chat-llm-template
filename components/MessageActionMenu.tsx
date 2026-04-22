@@ -27,6 +27,7 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
         onClick={() => onCopy(messageId)}
         className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
         title="Copy message"
+        aria-label="Copy message"
         type="button"
       >
         <Copy size={16} />
@@ -38,6 +39,7 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
           onClick={() => onEdit(messageId)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
           title="Edit message"
+          aria-label="Edit message"
           type="button"
         >
           <Pencil size={16} />
@@ -49,6 +51,7 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
         onClick={() => onDelete(chatId, messageId)}
         className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
         title="Delete message"
+        aria-label="Delete message"
         type="button"
       >
         <Trash2 size={16} />
@@ -60,6 +63,7 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
           onClick={() => onRegenerate(chatId, messageId)}
           className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           title="Regenerate response"
+          aria-label="Regenerate response"
           type="button"
         >
           <RefreshCw size={16} />

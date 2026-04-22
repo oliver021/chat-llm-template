@@ -42,6 +42,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({
         className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700
           ${chat.isPinned ? 'opacity-100 text-amber-500' : 'text-gray-400'}`}
         title={chat.isPinned ? 'Unpin chat' : 'Pin chat'}
+        aria-label={chat.isPinned ? 'Unpin chat' : 'Pin chat'}
       >
         <Pin size={14} className={chat.isPinned ? 'fill-current' : ''} />
       </button>

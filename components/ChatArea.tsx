@@ -11,9 +11,11 @@ import { Sparkles, ColorfulIcon } from './Icons';
 interface ChatAreaProps {
   chat: ChatSession | null;
   isTyping?: boolean;
+  // Forwarded ref so the global "/" shortcut can focus the input from App.tsx
+  inputRef?: React.RefObject<HTMLTextAreaElement>;
 }
 
-export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping }) => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping, inputRef }) => {
   const { handleSendMessage } = useChatActions();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isNewChat = !chat || chat.messages.length === 0;
@@ -23,21 +25,17 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping }) => {
     return groupMessagesByDate(chat.messages);
   }, [chat?.messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // Auto-scroll to bottom on every new message / token during streaming
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat?.messages]);
 
   return (
     // ChatArea Container: flex-1 fills remaining space after header
-    // h-full NOT NEEDED: Parent (main) has fixed header (h-16), so ChatArea takes remaining space via flex-1
     // overflow-hidden: Prevents double scrollbars; internal divs handle scrolling
     <div className="flex-1 flex flex-col relative bg-white dark:bg-gray-950 overflow-hidden">
       {isNewChat ? (
-        // New Chat View - Centered
+        // ── Welcome / New-Chat view ─────────────────────────────────────────
         <div className="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in-up overflow-y-auto">
           <div className="w-20 h-20 mb-8 rounded-3xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center shadow-inner">
             <ColorfulIcon icon={Sparkles} colorClass="text-blue-500 dark:text-blue-400" size={40} />
@@ -50,10 +48,10 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping }) => {
           </p>
 
           <div className="w-full max-w-3xl">
-            <ChatInput isCentered={true} />
+            <ChatInput isCentered inputRef={inputRef} />
           </div>
 
-          {/* Suggested Prompts */}
+          {/* Suggested prompts */}
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl w-full px-4">
             {SUGGESTED_PROMPTS.map((prompt, i) => (
               <button
@@ -67,12 +65,13 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping }) => {
           </div>
         </div>
       ) : (
-        // Existing Chat View - Standard Layout
+        // ── Existing-chat view ──────────────────────────────────────────────
         <>
           <div className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth">
             <div className="max-w-4xl mx-auto flex flex-col gap-2 pb-4">
               {messageGroups.map((group) => (
                 <div key={group.date}>
+                  {/* Date divider — sticky so it stays visible while scrolling */}
                   <div className="flex items-center gap-3 my-4 sticky top-0 bg-white dark:bg-gray-950 py-2 z-10">
                     <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
                     <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2">
@@ -87,14 +86,18 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping }) => {
                   </div>
                 </div>
               ))}
+
+              {/* Typing indicator shows only before the first streaming token arrives */}
               {isTyping && <TypingIndicator />}
+
+              {/* Scroll anchor — always kept at the bottom of the message list */}
               <div ref={messagesEndRef} />
             </div>
           </div>
 
-          {/* Bottom Input Area */}
+          {/* Bottom input area with gradient fade */}
           <div className="p-4 bg-gradient-to-t from-white via-white to-transparent dark:from-gray-950 dark:via-gray-950 pt-8">
-            <ChatInput />
+            <ChatInput inputRef={inputRef} />
           </div>
         </>
       )}
