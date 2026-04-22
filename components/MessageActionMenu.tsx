@@ -21,52 +21,52 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
   onRegenerate,
 }) => {
   return (
-    <div className="absolute top-0 right-0 -mr-2 -mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-lg border border-gray-200 dark:border-gray-700">
+    <div className="flex gap-1 items-center">
       {/* Copy button */}
       <button
         onClick={() => onCopy(messageId)}
-        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+        className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
         title="Copy message"
         aria-label="Copy message"
         type="button"
       >
-        <Copy size={16} />
+        <Copy size={14} />
       </button>
 
       {/* Edit button (user messages only) */}
       {!isAIMessage && onEdit && (
         <button
           onClick={() => onEdit(messageId)}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+          className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
           title="Edit message"
           aria-label="Edit message"
           type="button"
         >
-          <Pencil size={16} />
+          <Pencil size={14} />
         </button>
       )}
 
       {/* Delete button */}
       <button
         onClick={() => onDelete(chatId, messageId)}
-        className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+        className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-gray-500 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
         title="Delete message"
         aria-label="Delete message"
         type="button"
       >
-        <Trash2 size={16} />
+        <Trash2 size={14} />
       </button>
 
       {/* Regenerate button (AI messages only) */}
       {isAIMessage && (
         <button
           onClick={() => onRegenerate(chatId, messageId)}
-          className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          className="p-1.5 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded text-gray-500 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           title="Regenerate response"
           aria-label="Regenerate response"
           type="button"
         >
-          <RefreshCw size={16} />
+          <RefreshCw size={14} />
         </button>
       )}
     </div>

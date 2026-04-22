@@ -68,7 +68,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping, inputRef }) 
         // ── Existing-chat view ──────────────────────────────────────────────
         <>
           <div className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth">
-            <div className="max-w-4xl mx-auto flex flex-col gap-2 pb-4">
+            <div className="max-w-2xl mx-auto flex flex-col pb-4">
               {messageGroups.map((group) => (
                 <div key={group.date}>
                   {/* Date divider — sticky so it stays visible while scrolling */}

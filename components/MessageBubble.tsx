@@ -174,68 +174,75 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, chatId })
 
   return (
     <div
-      className={`group relative flex gap-4 w-full max-w-3xl mx-auto animate-fade-in-up ${isAI ? 'py-6' : 'py-4'}`}
+      className={`w-full flex ${isAI ? 'justify-start' : 'justify-end'} mb-4 animate-fade-in-up`}
     >
-      {/* Avatar */}
-      <div className="flex-shrink-0 mt-1">
-        {isAI ? (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
-            <Sparkles size={16} className="text-white" />
-          </div>
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden border border-gray-300 dark:border-gray-600">
-            <img src="https://picsum.photos/100/100?random=1" alt="User" className="w-full h-full object-cover" />
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        {/* Header row: name + timestamp + edited badge */}
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">
-            {isAI ? 'Aura' : 'You'}
-          </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {formatTime(message.timestamp)}
-          </span>
-          {message.isEdited && (
-            <span className="text-xs text-gray-400 dark:text-gray-500 italic">(edited)</span>
-          )}
-        </div>
-
-        {/* Message body — markdown for AI, plain text for user */}
-        <div className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+      <div className={`flex gap-2 ${isAI ? 'flex-row' : 'flex-row-reverse'} max-w-2xl group`}>
+        {/* Avatar */}
+        <div className="flex-shrink-0 mt-1">
           {isAI ? (
-            <ReactMarkdown components={markdownComponents}>
-              {message.content}
-            </ReactMarkdown>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
+              <Sparkles size={16} className="text-white" />
+            </div>
           ) : (
-            // User messages: preserve newlines, no markdown parsing
-            <div className="whitespace-pre-wrap">{message.content}</div>
+            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden border border-gray-300 dark:border-gray-600">
+              <img src="https://picsum.photos/100/100?random=1" alt="User" className="w-full h-full object-cover" />
+            </div>
           )}
         </div>
 
-        {/* Streaming cursor — blinking bar shown while the AI is still writing */}
-        {message.isStreaming && (
-          <span
-            className="inline-block w-0.5 h-4 bg-blue-500 ml-0.5 align-middle animate-pulse"
-            aria-label="AI is typing"
-          />
-        )}
-      </div>
+        {/* Message wrapper */}
+        <div className="flex flex-col gap-1">
+          {/* Content box */}
+          <div className={`${isAI ? 'bg-gray-100 dark:bg-gray-800' : 'bg-blue-500 dark:bg-blue-600'} rounded-lg px-4 py-2 max-w-xl`}>
+            {/* Header row: name + timestamp + edited badge */}
+            <div className={`flex items-baseline gap-2 mb-1 text-xs ${isAI ? 'text-gray-500 dark:text-gray-400' : 'text-blue-100 dark:text-blue-200'}`}>
+              <span className={`font-semibold text-sm ${isAI ? 'text-gray-800 dark:text-gray-200' : 'text-white'}`}>
+                {isAI ? 'Aura' : 'You'}
+              </span>
+              <span className={isAI ? 'text-gray-500 dark:text-gray-400' : 'text-blue-100 dark:text-blue-200'}>
+                {formatTime(message.timestamp)}
+              </span>
+              {message.isEdited && (
+                <span className={`italic ${isAI ? 'text-gray-400 dark:text-gray-500' : 'text-blue-100 dark:text-blue-200'}`}>(edited)</span>
+              )}
+            </div>
 
-      {/* Action menu — visible on hover, hidden while streaming */}
-      {!message.isStreaming && (
-        <MessageActionMenu
-          messageId={message.id}
-          chatId={chatId}
-          isAIMessage={isAI}
-          onCopy={handleCopyMessage}
-          onDelete={handleDeleteMessage}
-          onRegenerate={handleRegenerateMessage}
-        />
-      )}
+            {/* Message body — markdown for AI, plain text for user */}
+            <div className={`text-sm leading-relaxed ${isAI ? 'text-gray-700 dark:text-gray-300' : 'text-white'}`}>
+              {isAI ? (
+                <ReactMarkdown components={markdownComponents}>
+                  {message.content}
+                </ReactMarkdown>
+              ) : (
+                // User messages: preserve newlines, no markdown parsing
+                <div className="whitespace-pre-wrap">{message.content}</div>
+              )}
+            </div>
+
+            {/* Streaming cursor — blinking bar shown while the AI is still writing */}
+            {message.isStreaming && (
+              <span
+                className="inline-block w-0.5 h-4 bg-blue-400 ml-0.5 align-middle animate-pulse"
+                aria-label="AI is typing"
+              />
+            )}
+          </div>
+
+          {/* Action menu — below message, hidden while streaming */}
+          {!message.isStreaming && (
+            <div className={`flex ${isAI ? 'justify-start' : 'justify-end'} px-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
+              <MessageActionMenu
+                messageId={message.id}
+                chatId={chatId}
+                isAIMessage={isAI}
+                onCopy={handleCopyMessage}
+                onDelete={handleDeleteMessage}
+                onRegenerate={handleRegenerateMessage}
+              />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
