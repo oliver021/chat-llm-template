@@ -9,6 +9,9 @@ const STORAGE_KEYS = {
 interface UIState {
   sidebarOpen: boolean;
   settingsOpen: boolean;
+  compactMode?: boolean;
+  dataCollection?: boolean;
+  chatHistory?: boolean;
 }
 
 /**

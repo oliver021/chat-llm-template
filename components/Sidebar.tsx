@@ -32,6 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
+      aria-label="Chat sessions"
       className={`
       fixed inset-y-0 left-0 z-20 flex flex-col w-72 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 transition-transform duration-300 ease-in-out
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -56,41 +57,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Chat Lists */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-4">
-        {pinnedChats.length > 0 && (
-          <div className="mb-6">
-            <div className="px-5 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-              Pinned
+        {chats.length === 0 ? (
+          // Empty state
+          <div className="flex flex-col items-center justify-center h-full px-4 py-8 text-center">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center mb-4">
+              <Sparkles size={24} className="text-blue-500 dark:text-blue-400" />
             </div>
-            <div className="space-y-0.5">
-              {pinnedChats.map((chat) => (
-                <ChatItem
-                  key={chat.id}
-                  chat={chat}
-                  activeChatId={activeChatId}
-                  onSelectChat={onSelectChat}
-                  onTogglePin={onTogglePin}
-                />
-              ))}
-            </div>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">No conversations yet</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Start a new chat to begin</p>
+            <kbd className="px-2 py-1 text-xs rounded bg-gray-100 dark:bg-gray-800 font-mono text-gray-600 dark:text-gray-400">⌘K</kbd>
           </div>
-        )}
+        ) : (
+          <>
+            {pinnedChats.length > 0 && (
+              <div className="mb-6">
+                <div className="px-5 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  Pinned
+                </div>
+                <ul className="space-y-0.5" role="list">
+                  {pinnedChats.map((chat) => (
+                    <li key={chat.id}>
+                      <ChatItem
+                        chat={chat}
+                        activeChatId={activeChatId}
+                        onSelectChat={onSelectChat}
+                        onTogglePin={onTogglePin}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-        <div>
-          <div className="px-5 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-            Recent
-          </div>
-          <div className="space-y-0.5">
-            {recentChats.map((chat) => (
-              <ChatItem
-                key={chat.id}
-                chat={chat}
-                activeChatId={activeChatId}
-                onSelectChat={onSelectChat}
-                onTogglePin={onTogglePin}
-              />
-            ))}
-          </div>
-        </div>
+            <div>
+              <div className="px-5 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                Recent
+              </div>
+              <ul className="space-y-0.5" role="list">
+                {recentChats.map((chat) => (
+                  <li key={chat.id}>
+                    <ChatItem
+                      chat={chat}
+                      activeChatId={activeChatId}
+                      onSelectChat={onSelectChat}
+                      onTogglePin={onTogglePin}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Footer */}

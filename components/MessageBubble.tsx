@@ -30,6 +30,7 @@ SyntaxHighlighter.registerLanguage('css', css);
 import { Message } from '../types';
 import { formatTime } from '../utils/timeUtils';
 import { useChatActions } from '../context/ChatContext';
+import { useUIState } from '../hooks/useUIState';
 import { MessageActionMenu } from './MessageActionMenu';
 import { Sparkles } from './Icons';
 
@@ -165,6 +166,11 @@ const markdownComponents: Components = {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, chatId }) => {
   const isAI = message.role === 'ai';
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [draftContent, setDraftContent] = React.useState(message.content);
+  const editTextareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const { compactMode } = useUIState();
+
   const {
     handleCopyMessage,
     handleDeleteMessage,
@@ -172,9 +178,43 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, chatId })
     handleRegenerateMessage,
   } = useChatActions();
 
+  // Auto-focus textarea and adjust height when entering edit mode
+  React.useEffect(() => {
+    if (isEditing && editTextareaRef.current) {
+      editTextareaRef.current.focus();
+      editTextareaRef.current.style.height = 'auto';
+      editTextareaRef.current.style.height = `${editTextareaRef.current.scrollHeight}px`;
+    }
+  }, [isEditing]);
+
+  const handleSaveEdit = () => {
+    if (draftContent.trim()) {
+      handleEditMessage(chatId, message.id, draftContent.trim());
+      setIsEditing(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setDraftContent(message.content);
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Save on Ctrl/Cmd+Enter
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveEdit();
+    }
+    // Cancel on Escape
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelEdit();
+    }
+  };
+
   return (
     <div
-      className={`w-full flex ${isAI ? 'justify-start' : 'justify-end'} mb-4 animate-fade-in-up`}
+      className={`w-full flex ${isAI ? 'justify-start' : 'justify-end'} ${compactMode ? 'mb-2' : 'mb-4'} animate-fade-in-up`}
     >
       <div className={`flex gap-2 ${isAI ? 'flex-row' : 'flex-row-reverse'} max-w-2xl group`}>
         {/* Avatar */}
@@ -207,17 +247,48 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, chatId })
               )}
             </div>
 
-            {/* Message body — markdown for AI, plain text for user */}
-            <div className={`text-sm leading-relaxed ${isAI ? 'text-gray-700 dark:text-gray-300' : 'text-white'}`}>
-              {isAI ? (
-                <ReactMarkdown components={markdownComponents}>
-                  {message.content}
-                </ReactMarkdown>
-              ) : (
-                // User messages: preserve newlines, no markdown parsing
-                <div className="whitespace-pre-wrap">{message.content}</div>
-              )}
-            </div>
+            {/* Message body — markdown for AI, plain text for user, or edit textarea */}
+            {isEditing && !isAI ? (
+              // Edit mode textarea for user messages only
+              <div className="w-full">
+                <textarea
+                  ref={editTextareaRef}
+                  value={draftContent}
+                  onChange={(e) => setDraftContent(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className={`w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-blue-400 rounded-md font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${isAI ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}
+                />
+                {/* Save/Cancel buttons */}
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={handleSaveEdit}
+                    className="px-3 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+                    type="button"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="px-3 py-1 text-xs bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-md transition-colors"
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Normal message display
+              <div className={`text-sm leading-relaxed ${isAI ? 'text-gray-700 dark:text-gray-300' : 'text-white'}`}>
+                {isAI ? (
+                  <ReactMarkdown components={markdownComponents}>
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  // User messages: preserve newlines, no markdown parsing
+                  <div className="whitespace-pre-wrap">{message.content}</div>
+                )}
+              </div>
+            )}
 
             {/* Streaming cursor — blinking bar shown while the AI is still writing */}
             {message.isStreaming && (
@@ -229,13 +300,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, chatId })
           </div>
 
           {/* Action menu — below message, hidden while streaming */}
-          {!message.isStreaming && (
+          {!message.isStreaming && !isEditing && (
             <div className={`flex ${isAI ? 'justify-start' : 'justify-end'} px-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
               <MessageActionMenu
                 messageId={message.id}
                 chatId={chatId}
                 isAIMessage={isAI}
                 onCopy={handleCopyMessage}
+                onEdit={!isAI ? () => setIsEditing(true) : undefined}
                 onDelete={handleDeleteMessage}
                 onRegenerate={handleRegenerateMessage}
               />

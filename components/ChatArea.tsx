@@ -13,12 +13,17 @@ interface ChatAreaProps {
   isTyping?: boolean;
   // Forwarded ref so the global "/" shortcut can focus the input from App.tsx
   inputRef?: React.RefObject<HTMLTextAreaElement>;
+  // Whether any message is currently streaming
+  isStreaming?: boolean;
 }
 
-export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping, inputRef }) => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping, inputRef, isStreaming: isStreamingProp }) => {
   const { handleSendMessage } = useChatActions();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isNewChat = !chat || chat.messages.length === 0;
+
+  // Derive streaming state from active chat messages (unless explicitly passed)
+  const isStreaming = isStreamingProp ?? chat?.messages.some(m => m.isStreaming) ?? false;
 
   const messageGroups = useMemo(() => {
     if (!chat || chat.messages.length === 0) return [];
@@ -48,7 +53,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping, inputRef }) 
           </p>
 
           <div className="w-full max-w-3xl">
-            <ChatInput isCentered inputRef={inputRef} />
+            <ChatInput isCentered inputRef={inputRef} isStreaming={false} />
           </div>
 
           {/* Suggested prompts */}
@@ -97,7 +102,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping, inputRef }) 
 
           {/* Bottom input area with gradient fade */}
           <div className="p-4 bg-gradient-to-t from-white via-white to-transparent dark:from-gray-950 dark:via-gray-950 pt-8">
-            <ChatInput inputRef={inputRef} />
+            <ChatInput inputRef={inputRef} isStreaming={isStreaming} />
           </div>
         </>
       )}

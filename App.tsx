@@ -27,6 +27,7 @@ const App: React.FC = () => {
     handleDeleteMessage,
     handleEditMessage,
     handleRegenerateMessage,
+    handleClearHistory,
   } = useChats(closeSidebar);
 
   // Ref forwarded to ChatInput so the keyboard shortcut can focus it
@@ -59,6 +60,7 @@ const App: React.FC = () => {
         handleDeleteMessage,
         handleEditMessage,
         handleRegenerateMessage,
+        handleClearHistory,
       }}
     >
       <div className="flex h-full w-full overflow-hidden bg-white dark:bg-gray-950">

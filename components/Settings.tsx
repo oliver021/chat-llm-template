@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { X, User, Palette, Shield, Sparkles } from './Icons';
+import { useChatActions } from '../context/ChatContext';
+import { useUIState } from '../hooks/useUIState';
+import { useFocusTrap } from '../utils/focusTrap';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,7 +12,23 @@ interface SettingsModalProps {
 type TabId = 'account' | 'appearance' | 'privacy';
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<TabId>('account');
+  const { handleClearHistory } = useChatActions();
+  const { compactMode, toggleCompactMode, dataCollection, toggleDataCollection, chatHistory, toggleChatHistory } = useUIState();
+
+  // Trap focus within the modal when open
+  useFocusTrap(modalRef);
+
+  const handleClearHistoryWithConfirmation = () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete all your chat history? This cannot be undone.'
+    );
+    if (confirmed) {
+      handleClearHistory();
+      onClose();
+    }
+  };
 
   // Close on Escape key — standard modal accessibility behaviour
   React.useEffect(() => {
@@ -32,7 +51,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-gray-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity">
       {/* Modal Container */}
-      <div className="w-full max-w-5xl h-[85vh] max-h-[800px] bg-white dark:bg-gray-900 rounded-3xl shadow-2xl flex overflow-hidden animate-fade-in-up relative border border-gray-200 dark:border-gray-800">
+      <div ref={modalRef} className="w-full max-w-5xl h-[85vh] max-h-[800px] bg-white dark:bg-gray-900 rounded-3xl shadow-2xl flex overflow-hidden animate-fade-in-up relative border border-gray-200 dark:border-gray-800">
 
         {/* Close Button */}
         <button
@@ -133,15 +152,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Chat Density</h4>
-                  <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl">
-                    <div className="flex-1">
+                  <button
+                    onClick={toggleCompactMode}
+                    className="w-full flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    type="button"
+                    role="switch"
+                    aria-checked={compactMode}
+                  >
+                    <div className="flex-1 text-left">
                       <div className="font-medium text-gray-900 dark:text-white">Compact Mode</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">Reduce spacing between messages</div>
                     </div>
-                    <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 shadow-sm"></div>
+                    <div className={`w-11 h-6 rounded-full relative flex-shrink-0 transition-colors ${compactMode ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${compactMode ? 'right-0.5' : 'left-0.5'}`}></div>
                     </div>
-                  </div>
+                  </button>
                 </div>
               </div>
             )}
@@ -156,30 +181,45 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Data Controls</h4>
 
-                  <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl">
-                    <div className="flex-1">
+                  <button
+                    onClick={toggleDataCollection}
+                    className="w-full flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    type="button"
+                    role="switch"
+                    aria-checked={dataCollection}
+                  >
+                    <div className="flex-1 text-left">
                       <div className="font-medium text-gray-900 dark:text-white">Improve the model for everyone</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">Allow your content to be used to train our models.</div>
                     </div>
-                    <div className="w-11 h-6 bg-blue-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 shadow-sm"></div>
+                    <div className={`w-11 h-6 rounded-full relative flex-shrink-0 transition-colors ${dataCollection ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${dataCollection ? 'right-0.5' : 'left-0.5'}`}></div>
                     </div>
-                  </div>
+                  </button>
 
-                  <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl">
-                    <div className="flex-1">
+                  <button
+                    onClick={toggleChatHistory}
+                    className="w-full flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    type="button"
+                    role="switch"
+                    aria-checked={chatHistory}
+                  >
+                    <div className="flex-1 text-left">
                       <div className="font-medium text-gray-900 dark:text-white">Chat History</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">Save new chats to your history.</div>
                     </div>
-                    <div className="w-11 h-6 bg-blue-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 shadow-sm"></div>
+                    <div className={`w-11 h-6 rounded-full relative flex-shrink-0 transition-colors ${chatHistory ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${chatHistory ? 'right-0.5' : 'left-0.5'}`}></div>
                     </div>
-                  </div>
+                  </button>
                 </div>
 
                 <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">
                   <h4 className="text-sm font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider">Danger Zone</h4>
-                  <button className="px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors">
+                  <button
+                    onClick={handleClearHistoryWithConfirmation}
+                    className="px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                  >
                     Clear all chat history
                   </button>
                 </div>

@@ -183,6 +183,23 @@ interface ChatActionsContextValue {
    * and pass them as the conversation history. See connecting.md §2 for details.
    */
   handleRegenerateMessage: (chatId: string, messageId: string) => void;
+
+  /**
+   * Permanently delete all chats and clear all stored state.
+   *
+   * Behaviour:
+   * - Cancels any running stream.
+   * - Clears chats array to empty.
+   * - Resets activeChatId to null.
+   * - Clears all localStorage (chats, theme, UI state).
+   * - Fires toast.success('Chat history cleared').
+   *
+   * Callers: "Clear all chat history" button in Settings modal (Privacy tab, danger zone).
+   * Implemented in: hooks/useChats.ts → handleClearHistory
+   *
+   * This is a destructive action — should always be preceded by a confirmation dialog.
+   */
+  handleClearHistory: () => void;
 }
 
 /**

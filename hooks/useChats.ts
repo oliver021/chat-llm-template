@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { ChatSession, Message } from '../types';
 import { MOCK_CHATS } from '../constants';
 import { streamMockAiResponse } from '../services/mockAiService';
-import { getStoredChats, setStoredChats } from '../utils/storage';
+import { getStoredChats, setStoredChats, clearAllStorage } from '../utils/storage';
 
 interface UseChatsResult {
   chats: ChatSession[];
@@ -323,6 +323,16 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
     []
   );
 
+  const handleClearHistory = useCallback(() => {
+    cancelStreamRef.current?.();
+    cancelStreamRef.current = null;
+    setChats([]);
+    setActiveChatId(null);
+    setIsTyping(false);
+    clearAllStorage();
+    toast.success('Chat history cleared');
+  }, []);
+
   const activeChat = chats.find((c) => c.id === activeChatId) ?? null;
 
   return {
@@ -338,5 +348,6 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
     handleDeleteMessage,
     handleEditMessage,
     handleRegenerateMessage,
+    handleClearHistory,
   };
 }
