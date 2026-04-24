@@ -3,6 +3,7 @@ import { Toaster } from 'sonner';
 import { Sidebar } from './components/Sidebar';
 import { TopNav } from './components/TopNav';
 import { ChatArea } from './components/ChatArea';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { SettingsModal } from './components/Settings';
 import { ChatActionsProvider } from './context/ChatContext';
 import { useTheme } from './hooks/useTheme';
@@ -92,8 +93,10 @@ const App: React.FC = () => {
             toggleSidebar={openSidebar}
             currentChatTitle={activeChat?.title !== 'New Chat' ? activeChat?.title : undefined}
           />
-          {/* ChatArea: flex-1 takes remaining space after header (flex-shrink-0) */}
-          <ChatArea chat={activeChat} isTyping={isTyping} inputRef={inputRef} />
+          {/* ErrorBoundary isolates crashes to the chat area; sidebar + settings survive */}
+          <ErrorBoundary>
+            <ChatArea chat={activeChat} isTyping={isTyping} inputRef={inputRef} />
+          </ErrorBoundary>
         </main>
 
         <SettingsModal isOpen={settingsOpen} onClose={closeSettings} />

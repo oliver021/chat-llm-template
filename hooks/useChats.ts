@@ -4,16 +4,7 @@ import { ChatSession, Message } from '../types';
 import { MOCK_CHATS } from '../constants';
 import { streamMockAiResponse } from '../services/mockAiService';
 import { getStoredChats, setStoredChats, clearAllStorage } from '../utils/storage';
-
-// ── Constants ──────────────────────────────────────────────────────────────────
-const MAX_TITLE_LENGTH = 30;
-
-/** Derives a display title from the first message of a new chat. */
-function makeChatTitle(content: string): string {
-  return content.length > MAX_TITLE_LENGTH
-    ? `${content.slice(0, MAX_TITLE_LENGTH)}...`
-    : content;
-}
+import { makeChatTitle } from '../utils/chatUtils';
 
 interface UseChatsResult {
   chats: ChatSession[];
