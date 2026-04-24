@@ -3,6 +3,7 @@ import { X, User, Palette, Shield, Sparkles } from './Icons';
 import { useChatActions } from '../context/ChatContext';
 import { useUIState } from '../hooks/useUIState';
 import { useFocusTrap } from '../utils/focusTrap';
+import { SettingToggle } from './SettingToggle';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -152,21 +153,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Chat Density</h4>
-                  <button
-                    onClick={toggleCompactMode}
-                    className="w-full flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                    type="button"
-                    role="switch"
-                    aria-checked={compactMode}
-                  >
-                    <div className="flex-1 text-left">
-                      <div className="font-medium text-gray-900 dark:text-white">Compact Mode</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">Reduce spacing between messages</div>
-                    </div>
-                    <div className={`w-11 h-6 rounded-full relative flex-shrink-0 transition-colors ${compactMode ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${compactMode ? 'right-0.5' : 'left-0.5'}`}></div>
-                    </div>
-                  </button>
+                  <SettingToggle
+                    label="Compact Mode"
+                    description="Reduce spacing between messages"
+                    checked={compactMode}
+                    onToggle={toggleCompactMode}
+                  />
                 </div>
               </div>
             )}
@@ -181,37 +173,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Data Controls</h4>
 
-                  <button
-                    onClick={toggleDataCollection}
-                    className="w-full flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                    type="button"
-                    role="switch"
-                    aria-checked={dataCollection}
-                  >
-                    <div className="flex-1 text-left">
-                      <div className="font-medium text-gray-900 dark:text-white">Improve the model for everyone</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">Allow your content to be used to train our models.</div>
-                    </div>
-                    <div className={`w-11 h-6 rounded-full relative flex-shrink-0 transition-colors ${dataCollection ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${dataCollection ? 'right-0.5' : 'left-0.5'}`}></div>
-                    </div>
-                  </button>
+                  <SettingToggle
+                    label="Improve the model for everyone"
+                    description="Allow your content to be used to train our models."
+                    checked={dataCollection}
+                    onToggle={toggleDataCollection}
+                  />
 
-                  <button
-                    onClick={toggleChatHistory}
-                    className="w-full flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                    type="button"
-                    role="switch"
-                    aria-checked={chatHistory}
-                  >
-                    <div className="flex-1 text-left">
-                      <div className="font-medium text-gray-900 dark:text-white">Chat History</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">Save new chats to your history.</div>
-                    </div>
-                    <div className={`w-11 h-6 rounded-full relative flex-shrink-0 transition-colors ${chatHistory ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${chatHistory ? 'right-0.5' : 'left-0.5'}`}></div>
-                    </div>
-                  </button>
+                  <SettingToggle
+                    label="Chat History"
+                    description="Save new chats to your history."
+                    checked={chatHistory}
+                    onToggle={toggleChatHistory}
+                  />
                 </div>
 
                 <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">

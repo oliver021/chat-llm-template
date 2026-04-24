@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useChatActions } from '../context/ChatContext';
 import { Send, Plus } from './Icons';
 
+const MAX_INPUT_LENGTH  = 4000;
+const INPUT_WARN_THRESHOLD = 3500;
+
 interface ChatInputProps {
   isCentered?: boolean;
   // Optional ref forwarded from App so the "/" shortcut can focus the input
@@ -60,7 +63,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isCentered = false, inputR
         <textarea
           ref={textareaRef}
           value={input}
-          onChange={(e) => setInput(e.target.value.slice(0, 4000))}
+          onChange={(e) => setInput(e.target.value.slice(0, MAX_INPUT_LENGTH))}
           onKeyDown={handleKeyDown}
           placeholder="Message Aura…"
           rows={1}
@@ -91,13 +94,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isCentered = false, inputR
         <div className="flex items-center gap-4">
           {/* Character counter */}
           <span className={`text-xs font-mono ${
-            input.length > 4000
+            input.length > MAX_INPUT_LENGTH
               ? 'text-red-600 dark:text-red-400'
-              : input.length > 3500
+              : input.length > INPUT_WARN_THRESHOLD
               ? 'text-orange-600 dark:text-orange-400'
               : 'text-gray-500 dark:text-gray-400'
           }`}>
-            {input.length} / 4000
+            {input.length} / {MAX_INPUT_LENGTH}
           </span>
           {/* Shortcuts hint */}
           <span className="text-xs text-gray-300 dark:text-gray-600 hidden sm:block">

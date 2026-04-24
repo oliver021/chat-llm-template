@@ -5,11 +5,20 @@ import { MOCK_CHATS } from '../constants';
 import { streamMockAiResponse } from '../services/mockAiService';
 import { getStoredChats, setStoredChats, clearAllStorage } from '../utils/storage';
 
+// ── Constants ──────────────────────────────────────────────────────────────────
+const MAX_TITLE_LENGTH = 30;
+
+/** Derives a display title from the first message of a new chat. */
+function makeChatTitle(content: string): string {
+  return content.length > MAX_TITLE_LENGTH
+    ? `${content.slice(0, MAX_TITLE_LENGTH)}...`
+    : content;
+}
+
 interface UseChatsResult {
   chats: ChatSession[];
   activeChatId: string | null;
   activeChat: ChatSession | null;
-  // isTyping is kept for the TypingIndicator shown during the initial stream delay
   isTyping: boolean;
   handleNewChat: () => void;
   handleSelectChat: (id: string) => void;
@@ -19,6 +28,7 @@ interface UseChatsResult {
   handleDeleteMessage: (chatId: string, messageId: string) => void;
   handleEditMessage: (chatId: string, messageId: string, newContent: string) => void;
   handleRegenerateMessage: (chatId: string, messageId: string) => void;
+  handleClearHistory: () => void;
 }
 
 export function useChats(onMobileNavigate?: () => void): UseChatsResult {
@@ -29,7 +39,6 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
   const [isTyping, setIsTyping] = useState(false);
 
   // cancelStream holds the abort function returned by streamMockAiResponse.
-  // We call it if the user switches chat or the component unmounts mid-stream.
   const cancelStreamRef = useRef<(() => void) | null>(null);
 
   // Persist chats to localStorage whenever they change
@@ -39,17 +48,21 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
 
   // Cancel any in-flight stream on unmount
   useEffect(() => {
-    return () => {
-      cancelStreamRef.current?.();
-    };
+    return () => { cancelStreamRef.current?.(); };
   }, []);
 
-  const handleNewChat = useCallback(() => {
-    // Abort any running stream before switching
+  // ── Private helper ─────────────────────────────────────────────────────────
+  /** Cancels any running stream and resets the typing indicator. */
+  const cancelActiveStream = useCallback(() => {
     cancelStreamRef.current?.();
     cancelStreamRef.current = null;
     setIsTyping(false);
+  }, []);
 
+  // ── Navigation handlers ────────────────────────────────────────────────────
+
+  const handleNewChat = useCallback(() => {
+    cancelActiveStream();
     const newChat: ChatSession = {
       id: `chat-${Date.now()}`,
       title: 'New Chat',
@@ -60,19 +73,15 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
     setChats((prev) => [newChat, ...prev]);
     setActiveChatId(newChat.id);
     if (window.innerWidth < 768) onMobileNavigate?.();
-  }, [onMobileNavigate]);
+  }, [cancelActiveStream, onMobileNavigate]);
 
   const handleSelectChat = useCallback(
     (id: string) => {
-      // Abort any running stream before switching chats
-      cancelStreamRef.current?.();
-      cancelStreamRef.current = null;
-      setIsTyping(false);
-
+      cancelActiveStream();
       setActiveChatId(id);
       if (window.innerWidth < 768) onMobileNavigate?.();
     },
-    [onMobileNavigate]
+    [cancelActiveStream, onMobileNavigate]
   );
 
   const handleTogglePin = useCallback((id: string) => {
@@ -81,19 +90,19 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
     );
   }, []);
 
+  // ── Messaging handlers ─────────────────────────────────────────────────────
+
   const handleSendMessage = useCallback(
     (content: string) => {
-      // Abort any previous stream
-      cancelStreamRef.current?.();
-      cancelStreamRef.current = null;
+      cancelActiveStream();
 
       let currentChatId = activeChatId;
 
-      // If no active chat, create one and use its id
+      // If no active chat, create one inline
       if (!currentChatId) {
         const newChat: ChatSession = {
           id: `chat-${Date.now()}`,
-          title: content.slice(0, 30) + (content.length > 30 ? '...' : ''),
+          title: makeChatTitle(content),
           isPinned: false,
           updatedAt: Date.now(),
           messages: [],
@@ -110,13 +119,13 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
         timestamp: Date.now(),
       };
 
-      // Update chat with user message and set title if still 'New Chat'
+      // Append user message; set title on first message of a new chat
       setChats((prev) =>
         prev.map((chat) => {
           if (chat.id !== currentChatId) return chat;
           const newTitle =
             chat.title === 'New Chat' && chat.messages.length === 0
-              ? content.slice(0, 30) + (content.length > 30 ? '...' : '')
+              ? makeChatTitle(content)
               : chat.title;
           return {
             ...chat,
@@ -127,40 +136,32 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
         })
       );
 
-      // ── Streaming response ──────────────────────────────────────────────────
-      // 1. Show typing indicator while waiting for the first token
+      // ── Streaming response ────────────────────────────────────────────────
       setIsTyping(true);
-
-      // 2. Create a placeholder AI message with isStreaming=true.
-      //    Tokens will be appended to it as they arrive.
       const aiMessageId = `msg-ai-${Date.now()}`;
 
-      // We add the placeholder after a brief delay that matches the stream start
-      // delay so the typing indicator shows first, then seamlessly transitions.
+      // Brief delay so the typing indicator renders before the first token
       const placeholderDelay = setTimeout(() => {
         setIsTyping(false);
-
-        const placeholderMessage: Message = {
+        const placeholder: Message = {
           id: aiMessageId,
           role: 'ai',
           content: '',
           timestamp: Date.now(),
           isStreaming: true,
         };
-
         setChats((prev) =>
           prev.map((chat) =>
             chat.id === currentChatId
-              ? { ...chat, messages: [...chat.messages, placeholderMessage] }
+              ? { ...chat, messages: [...chat.messages, placeholder] }
               : chat
           )
         );
-      }, 380); // just under the stream's startDelay so it appears before first token
+      }, 380);
 
-      // 3. Start streaming tokens into the placeholder message
       const cancel = streamMockAiResponse(
         (token) => {
-          clearTimeout(placeholderDelay); // already past this point
+          clearTimeout(placeholderDelay);
           setChats((prev) =>
             prev.map((chat) => {
               if (chat.id !== currentChatId) return chat;
@@ -176,7 +177,6 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
           );
         },
         () => {
-          // Stream complete — mark message as done and persist
           setIsTyping(false);
           setChats((prev) =>
             prev.map((chat) => {
@@ -196,14 +196,16 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
 
       cancelStreamRef.current = cancel;
     },
-    [activeChatId]
+    [activeChatId, cancelActiveStream]
   );
 
-  // ── Message action handlers ───────────────────────────────────────────────
+  // ── Message action handlers ────────────────────────────────────────────────
 
   const handleCopyMessage = useCallback(
     (messageId: string) => {
-      const message = chats.flatMap((c) => c.messages).find((m) => m.id === messageId);
+      // Target only the active chat — avoids O(n×m) flatMap scan across all chats
+      const chat = chats.find((c) => c.id === activeChatId);
+      const message = chat?.messages.find((m) => m.id === messageId);
       if (!message) return;
 
       navigator.clipboard
@@ -211,7 +213,7 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
         .then(() => toast.success('Copied to clipboard'))
         .catch(() => toast.error('Could not access clipboard'));
     },
-    [chats]
+    [chats, activeChatId]
   );
 
   const handleDeleteMessage = useCallback((chatId: string, messageId: string) => {
@@ -253,9 +255,7 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
 
   const handleRegenerateMessage = useCallback(
     (chatId: string, messageId: string) => {
-      // Abort any current stream first
-      cancelStreamRef.current?.();
-      cancelStreamRef.current = null;
+      cancelActiveStream();
 
       // Remove the old AI message
       setChats((prev) =>
@@ -267,9 +267,8 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
       );
 
       const toastId = toast.loading('Regenerating response…');
-
-      // Add a new streaming placeholder
       const newAiId = `msg-ai-${Date.now()}`;
+
       const placeholder: Message = {
         id: newAiId,
         role: 'ai',
@@ -320,18 +319,16 @@ export function useChats(onMobileNavigate?: () => void): UseChatsResult {
 
       cancelStreamRef.current = cancel;
     },
-    []
+    [cancelActiveStream]
   );
 
   const handleClearHistory = useCallback(() => {
-    cancelStreamRef.current?.();
-    cancelStreamRef.current = null;
+    cancelActiveStream();
     setChats([]);
     setActiveChatId(null);
-    setIsTyping(false);
     clearAllStorage();
     toast.success('Chat history cleared');
-  }, []);
+  }, [cancelActiveStream]);
 
   const activeChat = chats.find((c) => c.id === activeChatId) ?? null;
 

@@ -13,17 +13,15 @@ interface ChatAreaProps {
   isTyping?: boolean;
   // Forwarded ref so the global "/" shortcut can focus the input from App.tsx
   inputRef?: React.RefObject<HTMLTextAreaElement>;
-  // Whether any message is currently streaming
-  isStreaming?: boolean;
 }
 
-export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping, inputRef, isStreaming: isStreamingProp }) => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping, inputRef }) => {
   const { handleSendMessage } = useChatActions();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isNewChat = !chat || chat.messages.length === 0;
 
-  // Derive streaming state from active chat messages (unless explicitly passed)
-  const isStreaming = isStreamingProp ?? chat?.messages.some(m => m.isStreaming) ?? false;
+  // Derived — single source of truth for streaming state
+  const isStreaming = chat?.messages.some(m => m.isStreaming) ?? false;
 
   const messageGroups = useMemo(() => {
     if (!chat || chat.messages.length === 0) return [];
@@ -62,7 +60,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ chat, isTyping, inputRef, is
               <button
                 key={i}
                 onClick={() => handleSendMessage(prompt)}
-                className="text-left p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-blue-200 dark:hover:border-blue-800 transition-all text-sm text-gray-600 dark:text-gray-300"
+                className="text-left p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 hover:bg-white dark:hover:bg-gray-800 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 text-sm text-gray-600 dark:text-gray-300"
               >
                 {prompt}
               </button>
